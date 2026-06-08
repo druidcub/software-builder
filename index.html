@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Druidcub Software Builder Portfolio</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.14);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #a78bfa;
+      --good: #22c55e;
+      --warning: #f59e0b;
+      --danger: #fb7185;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.22), transparent 32%),
+        radial-gradient(circle at 85% 0%, rgba(167, 139, 250, 0.22), transparent 34%),
+        radial-gradient(circle at 50% 90%, rgba(34, 197, 94, 0.12), transparent 30%),
+        var(--bg);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 0 0 48px;
+    }
+
+    /* Expanded hero: normal document flow, not sticky, not height-changing on scroll */
+    .hero-header {
+      position: relative;
+      margin: 0 -14px 24px;
+      padding: 42px 14px 54px;
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.96),
+        rgba(15, 23, 42, 0.82)
+      );
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 1;
+      transition: opacity 0.22s ease;
+    }
+
+    body.header-collapsed .hero-header {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .hero-header::before {
+      content: "";
+      position: absolute;
+      inset: -120px -80px auto auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.13);
+      filter: blur(14px);
+      pointer-events: none;
+    }
+
+    .hero-header::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 0;
+      height: 1px;
+      background: rgba(125, 211, 252, 0.16);
+      pointer-events: none;
+    }
+
+    /* Compact header: independent fixed layer, only transform/opacity change */
+    .compact-header {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      z-index: 100;
+      width: min(1208px, calc(100% - 4px));
+      transform: translateX(-50%) translateY(-120%);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border-radius: 0 0 22px 22px;
+      background: linear-gradient(
+        180deg,
+        rgba(2, 6, 23, 0.98),
+        rgba(15, 23, 42, 0.94)
+      );
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(125, 211, 252, 0.22);
+      border-top: 0;
+      box-shadow: 0 14px 46px rgba(0, 0, 0, 0.45);
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    body.header-collapsed .compact-header {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .compact-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .compact-brand {
+      min-width: 0;
+    }
+
+    .compact-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #bae6fd;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .compact-title {
+      margin: 0;
+      font-size: clamp(18px, 3vw, 28px);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .compact-actions {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+      align-items: center;
+    }
+
+    .page-top {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .lang-btn {
+      border: 0;
+      min-width: 92px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--text);
+      background: transparent;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .lang-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      color: #0f172a;
+      background: linear-gradient(135deg, #7dd3fc, #c4b5fd);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: center;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 12px;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      color: #bae6fd;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--good);
+      box-shadow: 0 0 18px var(--good);
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      padding-right: 0.04em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #e0f2fe, #7dd3fc, #c4b5fd);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-text {
+      margin: 22px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .hero-panel {
+      position: relative;
+      padding: 24px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: -80px -80px auto auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.18);
+      filter: blur(8px);
+    }
+
+    .builder-card-title {
+      position: relative;
+      font-size: 15px;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+
+    .builder-flow {
+      position: relative;
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .flow-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.16);
+      color: #7dd3fc;
+      flex: 0 0 auto;
+    }
+
+    .flow-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .flow-item span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin: 34px 0 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .project-card {
+      grid-column: span 6;
+      position: relative;
+      overflow: hidden;
+      min-height: 310px;
+      padding: 22px;
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(16px);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(125, 211, 252, 0.45);
+      background: rgba(255, 255, 255, 0.11);
+    }
+
+    .project-card.large {
+      grid-column: span 12;
+      min-height: 340px;
+    }
+
+    .project-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .project-icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      font-size: 26px;
+      background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(167,139,250,0.22));
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #c4b5fd;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.22);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .project-card h3 {
+      margin: 0 0 10px;
+      font-size: 25px;
+      letter-spacing: -0.03em;
+    }
+
+    .project-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 22px;
+    }
+
+    .point {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dbeafe;
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #020617;
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #e2e8f0;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .footer {
+      margin-top: 38px;
+      padding: 20px;
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .project-card,
+      .project-card.large {
+        grid-column: span 12;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero-header {
+        margin-left: -8px;
+        margin-right: -8px;
+        padding-top: 28px;
+        padding-bottom: 44px;
+      }
+
+      .compact-title {
+        white-space: normal;
+        font-size: clamp(17px, 4.5vw, 24px);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+        padding-top: 0;
+      }
+
+      .hero-header {
+        padding: 20px 14px 34px;
+      }
+
+      .hero-panel {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .project-card {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .lang-btn {
+        min-width: 78px;
+      }
+
+      h1 {
+        font-size: clamp(36px, 13vw, 56px);
+      }
+
+      .compact-header {
+        width: calc(100% - 4px);
+        padding: 10px 12px;
+      }
+
+      .compact-inner {
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .compact-actions .lang-switch {
+        gap: 4px;
+        padding: 4px;
+      }
+
+      .compact-actions .lang-btn {
+        min-width: 58px;
+        padding: 7px 9px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="compact-header" id="compactHeader">
+    <div class="compact-inner">
+      <div class="compact-brand">
+        <div class="compact-eyebrow">
+          <span class="eyebrow-dot"></span>
+          <span data-i18n="eyebrow">Software Builder Portfolio</span>
+        </div>
+        <h2 class="compact-title" data-i18n-html="heroTitle">
+          把想法<br />
+          做成<span class="gradient-text">能點擊的產品</span>
+        </h2>
+      </div>
+      <div class="compact-actions">
+        <div class="lang-switch" aria-label="Language switcher">
+          <button class="lang-btn active" type="button" data-lang-btn="zh">中文</button>
+          <button class="lang-btn" type="button" data-lang-btn="en">English</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <header class="hero-header" id="heroHeader">
+      <div class="page-top">
+        <div class="lang-switch" aria-label="Language switcher">
+          <button class="lang-btn active" type="button" data-lang-btn="zh">中文</button>
+          <button class="lang-btn" type="button" data-lang-btn="en">English</button>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow" data-i18n="eyebrow">
+            <span class="eyebrow-dot"></span>
+            Software Builder Portfolio
+          </div>
+          <h1 data-i18n-html="heroTitle">
+            把想法<br />
+            做成<span class="gradient-text">能點擊的產品</span>
+          </h1>
+          <p class="hero-text" data-i18n="heroText">
+            這裡收錄一組前端展示作品：從製造排程、Email 模板、Excel 預覽、
+            條碼掃描到親子小遊戲。每個作品都不是單純畫面，而是把真實情境拆成
+            可以操作、可以驗證、可以延伸的產品原型。
+          </p>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="builder-card-title" data-i18n="buildTitle">What I build</div>
+          <div class="builder-flow">
+            <div class="flow-item">
+              <div class="flow-icon">01</div>
+              <div>
+                <strong data-i18n="flow1Title">Business Flow to UI</strong>
+                <span data-i18n="flow1Text">把流程、表單、報表與資料關係整理成清楚的操作介面。</span>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-icon">02</div>
+              <div>
+                <strong data-i18n="flow2Title">Interactive Prototype</strong>
+                <span data-i18n="flow2Text">用瀏覽器快速做出能展示、能測試、能討論的功能原型。</span>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-icon">03</div>
+              <div>
+                <strong data-i18n="flow3Title">Deployable Demo</strong>
+                <span data-i18n="flow3Text">透過 GitHub Pages 分享展示頁，降低溝通成本。</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </header>
+
+    <section>
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="sectionTitle">Demo Projects</h2>
+          <p data-i18n="sectionText">每個卡片都連到可操作的 GitHub Pages 展示頁。</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <article class="project-card large">
+          <div class="project-top">
+            <div class="project-icon">🏭</div>
+            <span class="tag">Manufacturing System</span>
+          </div>
+          <h3>Manufacturing Plan</h3>
+          <p data-i18n="manufacturingDesc">
+            製造生產規劃報表 Demo，聚焦生產排程查詢、物料需求預估、
+            原料缺料分析、產線產能檢視與趨勢圖表。這個作品展現的是：
+            如何把製造現場與生管需求，轉換成可查詢、可分析、可維護的管理介面。
+          </p>
+          <div class="points">
+            <span class="point">Production Planning</span>
+            <span class="point">Material Requirement</span>
+            <span class="point">Shortage Analysis</span>
+            <span class="point">Chart.js</span>
+            <span class="point">Vue / Bootstrap</span>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://druidcub.github.io/manufacturing-plan/" target="_blank" rel="noopener">Open Demo →</a>
+            <a class="btn btn-ghost" href="https://github.com/druidcub/manufacturing-plan" target="_blank" rel="noopener">View Repo</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-top">
+            <div class="project-icon">✉️</div>
+            <span class="tag">Template System</span>
+          </div>
+          <h3>Email Template Demo</h3>
+          <p data-i18n="emailDesc">
+            瀏覽器端 Email 模板編輯器，使用 CKEditor 5 編輯 HTML 信件模板，
+            搭配 mock data 預覽合併後的結果。這個作品展現的是：
+            如何讓通知信件模板化、版本化、可重用，減少每個系統重複開發 Email 功能。
+          </p>
+          <div class="points">
+            <span class="point">CKEditor 5</span>
+            <span class="point">Template Versioning</span>
+            <span class="point">Preview Merge</span>
+            <span class="point">Swagger UI</span>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://druidcub.github.io/email-template-demo/" target="_blank" rel="noopener">Open Demo →</a>
+            <a class="btn btn-ghost" href="https://druidcub.github.io/email-template-demo/api.html" target="_blank" rel="noopener">API Swagger</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-top">
+            <div class="project-icon">📊</div>
+            <span class="tag">Data Viewer</span>
+          </div>
+          <h3>Excel Viewer Demo</h3>
+          <p data-i18n="excelDesc">
+            純前端 Excel Viewer，可直接在瀏覽器上傳與預覽 .xlsx，
+            支援工作表切換、版面保留、圖表內容呈現與縮放。這個作品展現的是：
+            不依賴後端，也能處理常見商務文件檢視情境。
+          </p>
+          <div class="points">
+            <span class="point">ExcelJS</span>
+            <span class="point">JSZip</span>
+            <span class="point">Worksheet Switch</span>
+            <span class="point">No Backend</span>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://druidcub.github.io/excel-viewer-demo/" target="_blank" rel="noopener">Open Demo →</a>
+            <a class="btn btn-ghost" href="https://github.com/druidcub/excel-viewer-demo" target="_blank" rel="noopener">View Repo</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-top">
+            <div class="project-icon">📷</div>
+            <span class="tag">Mobile Utility</span>
+          </div>
+          <h3>Barcode / QR Scanner Demo</h3>
+          <p data-i18n="scannerDesc">
+            條碼與 QR Code 掃描工具，支援相機掃描、圖片解碼、掃描紀錄與 PWA。
+            這個作品展現的是：如何把手機瀏覽器變成現場作業工具，例如物料、
+            設備、出入庫或表單快速帶入資料。
+          </p>
+          <div class="points">
+            <span class="point">Camera Scan</span>
+            <span class="point">html5-qrcode</span>
+            <span class="point">PWA</span>
+            <span class="point">Scan History</span>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://druidcub.github.io/barcode-qr-scanner-demo/" target="_blank" rel="noopener">Open Demo →</a>
+            <a class="btn btn-ghost" href="https://github.com/druidcub/barcode-qr-scanner-demo" target="_blank" rel="noopener">View Repo</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-top">
+            <div class="project-icon">🎮</div>
+            <span class="tag">Interaction Design</span>
+          </div>
+          <h3>Number Game</h3>
+          <p data-i18n="gameDesc">
+            適合練習觀察力、反應力與數字辨識的小遊戲集合，包含順序點、
+            隨機點與計時挑戰。這個作品展現的是：用簡單的 HTML/CSS/JS
+            做出即時互動、音效回饋、動畫與手機友善體驗。
+          </p>
+          <div class="points">
+            <span class="point">Vanilla JS</span>
+            <span class="point">CSS Grid</span>
+            <span class="point">Timer Challenge</span>
+            <span class="point">Web Audio API</span>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://druidcub.github.io/number-game/" target="_blank" rel="noopener">Open Demo →</a>
+            <a class="btn btn-ghost" href="https://github.com/druidcub/number-game" target="_blank" rel="noopener">View Repo</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span data-i18n-html="footerText"><strong>Druidcub / Software Builder</strong><br />
+      Building small, focused, deployable demos for business workflows, browser utilities,
+      data visualization, and interactive user experiences.</span>
+    </footer>
+  </main>
+
+  <script>
+    (function() {
+      const translations = {
+        zh: {
+          eyebrow: "Software Builder Portfolio",
+          heroTitle: '把想法<br />做成<span class="gradient-text">能點擊的產品</span>',
+          heroText: "這裡收錄一組前端展示作品：從製造排程、Email 模板、Excel 預覽、條碼掃描到親子小遊戲。每個作品都不是單純畫面，而是把真實情境拆成可以操作、可以驗證、可以延伸的產品原型。",
+          buildTitle: "What I build",
+          flow1Title: "Business Flow to UI",
+          flow1Text: "把流程、表單、報表與資料關係整理成清楚的操作介面。",
+          flow2Title: "Interactive Prototype",
+          flow2Text: "用瀏覽器快速做出能展示、能測試、能討論的功能原型。",
+          flow3Title: "Deployable Demo",
+          flow3Text: "透過 GitHub Pages 分享展示頁，降低溝通成本。",
+          sectionTitle: "Demo Projects",
+          sectionText: "每個卡片都連到可操作的 GitHub Pages 展示頁。",
+          manufacturingDesc: "製造生產規劃報表 Demo，聚焦生產排程查詢、物料需求預估、原料缺料分析、產線產能檢視與趨勢圖表。這個作品展現的是：如何把製造現場與生管需求，轉換成可查詢、可分析、可維護的管理介面。",
+          emailDesc: "瀏覽器端 Email 模板編輯器，使用 CKEditor 5 編輯 HTML 信件模板，搭配 mock data 預覽合併後的結果。這個作品展現的是：如何讓通知信件模板化、版本化、可重用，減少每個系統重複開發 Email 功能。",
+          excelDesc: "純前端 Excel Viewer，可直接在瀏覽器上傳與預覽 .xlsx，支援工作表切換、版面保留、圖表內容呈現與縮放。這個作品展現的是：不依賴後端，也能處理常見商務文件檢視情境。",
+          scannerDesc: "條碼與 QR Code 掃描工具，支援相機掃描、圖片解碼、掃描紀錄與 PWA。這個作品展現的是：如何把手機瀏覽器變成現場作業工具，例如物料、設備、出入庫或表單快速帶入資料。",
+          gameDesc: "適合練習觀察力、反應力與數字辨識的小遊戲集合，包含順序點、隨機點與計時挑戰。這個作品展現的是：用簡單的 HTML/CSS/JS 做出即時互動、音效回饋、動畫與手機友善體驗。",
+          footerText: "<strong>Druidcub / Software Builder</strong><br />Building small, focused, deployable demos for business workflows, browser utilities, data visualization, and interactive user experiences."
+        },
+        en: {
+          eyebrow: "Software Builder Portfolio",
+          heroTitle: 'Making Ideas <span class="gradient-text">Clickable.</span>',
+          heroText: "This portfolio brings together front-end demos across manufacturing planning, email templates, Excel preview, barcode scanning, and family-friendly mini games. Each project is more than a visual mockup. It is a usable product prototype designed for real scenarios, validation, and extension.",
+          buildTitle: "What I build",
+          flow1Title: "Business Flow to UI",
+          flow1Text: "I turn workflows, forms, reports, and data relationships into clear and usable interfaces.",
+          flow2Title: "Interactive Prototype",
+          flow2Text: "I build browser-based prototypes that are easy to demo, test, and discuss with stakeholders.",
+          flow3Title: "Deployable Demo",
+          flow3Text: "I publish lightweight demos through GitHub Pages to reduce communication cost and speed up feedback.",
+          sectionTitle: "Demo Projects",
+          sectionText: "Each card links to a live, interactive GitHub Pages demo.",
+          manufacturingDesc: "A manufacturing planning and reporting demo focused on production scheduling, material requirement forecasting, shortage analysis, line capacity visibility, and trend charts. This project shows how shop-floor and planning needs can be transformed into a searchable, analyzable, and maintainable management interface.",
+          emailDesc: "A browser-based email template editor powered by CKEditor 5, with mock data for merged preview. This project shows how notification emails can be templated, versioned, and reused to avoid rebuilding email features separately in every system.",
+          excelDesc: "A pure front-end Excel viewer that supports uploading and previewing .xlsx files directly in the browser, including worksheet switching, layout preservation, chart rendering, and zooming. It demonstrates how common document viewing scenarios can be handled without a backend.",
+          scannerDesc: "A barcode and QR code scanning utility with camera scan, image decoding, scan history, and PWA support. This project shows how a mobile browser can become a practical field tool for materials, equipment, warehouse operations, and rapid form input.",
+          gameDesc: "A small collection of number-based mini games designed for observation, reaction speed, and number recognition, including ordered tapping, random tapping, and timed challenges. It demonstrates responsive interaction design, sound feedback, animation, and mobile-friendly gameplay using simple web technologies.",
+          footerText: "<strong>Druidcub / Software Builder</strong><br />Building small, focused, deployable demos for business workflows, browser utilities, data visualization, and interactive user experiences."
+        }
+      };
+
+      const langButtons = document.querySelectorAll("[data-lang-btn]");
+      const savedLang = localStorage.getItem("portfolio-lang");
+      const initialLang = savedLang === "en" ? "en" : "zh";
+      const collapseThreshold = 240;
+      let isHeaderCollapsed = false;
+      let ticking = false;
+
+      function applyLanguage(lang) {
+        const dict = translations[lang] || translations.zh;
+
+        document.documentElement.lang = lang === "en" ? "en" : "zh-Hant";
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          if (dict[key]) node.textContent = dict[key];
+        });
+
+        document.querySelectorAll("[data-i18n-html]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-html");
+          if (dict[key]) node.innerHTML = dict[key];
+        });
+
+        langButtons.forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.getAttribute("data-lang-btn") === lang
+          );
+        });
+
+        localStorage.setItem("portfolio-lang", lang);
+      }
+
+      function syncHeaderState() {
+        const y = window.scrollY;
+
+        if (!isHeaderCollapsed && y > collapseThreshold) {
+          isHeaderCollapsed = true;
+          document.body.classList.add("header-collapsed");
+        }
+
+        if (isHeaderCollapsed && y < collapseThreshold - 90) {
+          isHeaderCollapsed = false;
+          document.body.classList.remove("header-collapsed");
+        }
+
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(syncHeaderState);
+          ticking = true;
+        }
+      }
+
+      langButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          applyLanguage(button.getAttribute("data-lang-btn"));
+        });
+      });
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      applyLanguage(initialLang);
+      syncHeaderState();
+    })();
+  </script>
+</body>
+</html>
